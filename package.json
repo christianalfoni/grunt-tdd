@@ -26,7 +26,8 @@
     "buster-test": "~0.7.5",
     "lodash": "~2.4.1",
     "sinon": "~1.7.3",
-    "expect.js": "~0.2.0"
+    "expect.js": "~0.2.0",
+    "mocha": "~1.15.1"
   },
   "keywords": [
     "gruntplugin",

@@ -40,27 +40,6 @@ module.exports = function (grunt) {
 
     // METHODS
     var p = {
-        createTestRunner : function () {
-            var testRunner = require('buster-test').testRunner,
-                runner = testRunner.create({random: false});
-            return runner;
-        },
-        runNodeTest: function (runner) {
-            var reporter = require(__dirname + '/../libs/busterReporter').create(),
-            handleBadSyntax = function () {
-                process.removeListener('uncaughtException', handleBadSyntax);
-                runner.emit('grunt-tdd:failed', 'Bad syntax in file ' + tests[selectedTest]);
-            };
-            process.on('uncaughtException', handleBadSyntax);
-            var test = require(process.cwd() + '/' + tests[selectedTest]);
-            process.removeListener('uncaughtException', handleBadSyntax);
-            delete require.cache[process.cwd() + '/' + tests[selectedTest]]; // Remove cached to enable reloading of file
-            if (_.isEmpty(test)) {
-                return runner.emit('grunt-tdd:failed', 'No exports, remember putting module.exports in ' + tests[selectedTest]);
-            }
-            reporter.listen(runner);
-            reporter.runSuite(runner, test);
-        },
         extractFilesMap: function (files) {
             var filesMap = {};
             files.forEach(function (fileData) {
@@ -92,7 +71,7 @@ module.exports = function (grunt) {
             isNode = typeof options.node === 'undefined' ? false : options.node;
             sinon = options.sinon;
             expect = options.expect;
-
+            console.log('runner is set to ' + runner);
             if (isNode) {
 
                 if (runner === 'buster') {
@@ -197,20 +176,60 @@ module.exports = function (grunt) {
                     res.end(body);
                 };
 
-            if (isNode) {
-                var runner = p.createTestRunner();
-                runner.on('grunt-tdd:ready', function (data) {
-                    console.log('tdd-ready');
-                    nodeTest = 'var nodeSuites = JSON.parse(\'' + JSON.stringify(data.suites).replace(/\\n/g, '\\\\n') + '\');' + '\n' +
+            /*
+             NODE BUSTER TEST RUN
+             TODO: REFACTOR
+             */
+            console.log('with runner ' + runner);
+            if (isNode && runner === 'buster') {
+
+                var testRunner = require('buster-test').testRunner,
+                    theRunner = testRunner.create({random: false});
+                theRunner.on('grunt-tdd:ready', function (data) {
+                    nodeTest = 'var nodeSuites = JSON.parse(\'' + JSON.stringify(data.suites).replace(/\\n/g, '\\\\n').replace(/\\"/g, '\\\\"').replace(/\'/g, '\\\'') + '\');' + '\n' +
                         'var nodeStats = JSON.parse(\'' + JSON.stringify(data.stats) + '\');';
                     send();
                 });
-                runner.on('grunt-tdd:failed', function (error) {
-                    console.log('tdd-failed');
+                theRunner.on('grunt-tdd:failed', function (error) {
                     nodeTest = 'var nodeFailed = "' + error + '";\n';
                     send();
                 });
-                p.runNodeTest(runner);
+                var reporter = require(__dirname + '/../libs/busterReporter').create(),
+                    handleBadSyntax = function () {
+                        process.removeListener('uncaughtException', handleBadSyntax);
+                        runner.emit('grunt-tdd:failed', 'Bad syntax in file ' + tests[selectedTest]);
+                    };
+                process.on('uncaughtException', handleBadSyntax);
+                var test = require(process.cwd() + '/' + tests[selectedTest]);
+                process.removeListener('uncaughtException', handleBadSyntax);
+                delete require.cache[process.cwd() + '/' + tests[selectedTest]]; // Remove cached to enable reloading of file
+                if (_.isEmpty(test)) {
+                    return theRunner.emit('grunt-tdd:failed', 'No exports, remember putting module.exports in ' + tests[selectedTest]);
+                }
+                reporter.listen(theRunner);
+                reporter.runSuite(theRunner, test);
+
+                /*
+                 NODE MOCHA TEST RUN
+                 TODO: REFACTOR
+                 */
+            } else if (isNode && runner === 'mocha') {
+                var testRunner = require('mocha'),
+                    clean = require(__dirname + '/../libs/mochaCleaner'),
+                    theRunner = new testRunner({
+                        ignoreLeaks: false,
+                        ui: 'bdd'
+                    });
+                console.log(testRunner.prototype);
+                theRunner.addFile(process.cwd() + '/' + tests[selectedTest]);
+                delete require.cache[process.cwd() + '/' + tests[selectedTest]]; // Remove cached to enable reloading of file
+                theRunner.run(function (errors) {
+                    var result = clean(theRunner.suite.suites);
+                    nodeTest = 'var nodeSuites = JSON.parse(\'' + JSON.stringify(result.suites).replace(/\\n/g, '\\\\n').replace(/\\"/g, '\\\\"').replace(/\'/g, '\\\'') + '\');' + '\n' +
+                        'var nodeStats = JSON.parse(\'' + JSON.stringify(result.stats) + '\');';
+                    send();
+                });
+
             } else {
                 send();
             }
