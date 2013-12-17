@@ -9,6 +9,7 @@
 html, body {
     margin: 0.5em 0.7em;
     padding: 0;
+    min-height: 100%;
     font-size: 120%;
     background-color: #111;
     font-family: Consolas !important;
@@ -178,4 +179,23 @@ select {
     position: absolute;
     right: 0.5em;
     top: 0.7em;
+}
+
+h1.error:before {
+    content: '!';
+    color: #c33;
+    font-weight: bold;
+    font-size: 2em;
+    padding-right: 0.25em;
+}
+h1.error {
+    font-size: 1em;
+    position: absolute;
+    top: 25%;
+    width: 75%;
+    margin: auto;
+    display: inline-block;
+    left: 0;
+    right: 0;
+    white-space: nowrap;
 }

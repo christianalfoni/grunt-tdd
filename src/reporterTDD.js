@@ -241,13 +241,19 @@
         throw: function (message) {
             throw Error('reporterTDD(): ' + message);
         },
+        displayError: function (error) {
+            var element = reporterTDD.createElement('h1', 'error');
+            element.innerHTML = error.replace(/\n/g, '<br/>');
+            document.body.appendChild(element);
+            document.body.style.display = 'block';
+        },
         initialize: function () {
             if (window.nodeSuites) {
                 reporterTDD.suites = window.nodeSuites;
                 reporterTDD.stats = window.nodeStats;
                 window.addEventListener('load', reporterTDD.displayResults);
             } else if (window.nodeFailed) {
-                alert(window.nodeFailed);
+                reporterTDD.displayError(window.nodeFailed);
             } else {
                 reporterTDD.setRunner();
                 reporterTDD.registerCollapseEvent();

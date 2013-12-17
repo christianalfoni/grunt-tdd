@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <style>
+        html, body {
+            background-color: #111;
+        }
+    </style>
+    <link rel="stylesheet" href="reporterTDD.css">
+    <script>
+        var changeTest = function () {
+            location.href = "/test?index=" + document.getElementById("testSelector").selectedIndex;
+        };
+        {{node}}
+    </script>
+</head>
+<body>
+{{libs}}
+{{sources}}
+<script src="/reporter.js"></script>
+<select id="testSelector" onchange="changeTest()">
+    {{tests}}
+</select>
+{{test}}
+</body>
+
+</html>

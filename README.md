@@ -4,7 +4,12 @@ grunt-tdd
 Run browser and Node JS tests on Buster, Mocha or Jasmine and get the reports in the browser
 
 ### TODO
-- Refactor error handling of Node test and display as text on reporter (with stack trace on syntax error, if possible)
-- Refactor Node handling in general
-- Make sources watchable when running Node, do not include in response to browser
 - Add timeouts to Buster
+- RequireJS support
+- Add general syntax error handling
+- Add jasmine as Node test runner
+- Add mocha test libraries (chai, should, better-assert)
+
+### NEW FEATS
+- Search tests
+- Run other selected tests in background and indicate error
