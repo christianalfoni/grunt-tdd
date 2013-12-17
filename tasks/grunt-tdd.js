@@ -193,17 +193,20 @@ module.exports = function (grunt) {
                     res.writeHead(200, {
                         "Content-Type": "text/html"
                     });
+                    console.log('sending response');
                     res.end(body);
                 };
 
             if (isNode) {
                 var runner = p.createTestRunner();
                 runner.on('grunt-tdd:ready', function (data) {
+                    console.log('tdd-ready');
                     nodeTest = 'var nodeSuites = JSON.parse(\'' + JSON.stringify(data.suites).replace(/\\n/g, '\\\\n') + '\');' + '\n' +
                         'var nodeStats = JSON.parse(\'' + JSON.stringify(data.stats) + '\');';
                     send();
                 });
                 runner.on('grunt-tdd:failed', function (error) {
+                    console.log('tdd-failed');
                     nodeTest = 'var nodeFailed = "' + error + '";\n';
                     send();
                 });
@@ -287,6 +290,7 @@ module.exports = function (grunt) {
                         break;
                     case '/test':
                         p.selectTest(req, res, urlData.query);
+                        break;
                     default:
                         p.sendFile(req, res);
                 }
