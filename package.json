@@ -1,0 +1,36 @@
+{
+  "name": "grunt-buster-tdd",
+  "description": "Run browser and Node JS tests on Buster, Mocha or Jasmine and get the reports in the browser",
+  "version": "0.1.4",
+  "homepage": "https://github.com/christianalfoni/grunt-tdd",
+  "author": {
+    "name": "christianalfoni",
+    "email": "christian.jorgensen@marcello.no",
+    "url": "www.christianalfoni.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/christianalfoni/grunt-tdd"
+  },
+  "bugs": {
+    "url": "https://github.com/christianalfoni/grunt-tdd/issues"
+  },
+  "main": "Gruntfile.js",
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "dependencies": {
+    "buster-test": "~0.7.5",
+    "lodash": "~2.4.1",
+    "sinon": "~1.7.3",
+    "expect.js": "~0.2.0"
+  },
+  "keywords": [
+    "gruntplugin",
+    "buster"
+  ],
+  "readmeFilename": "README.md"
+}
