@@ -27,7 +27,11 @@
     "lodash": "~2.4.1",
     "sinon": "~1.7.3",
     "expect.js": "~0.2.0",
-    "mocha": "~1.15.1"
+    "mocha": "~1.15.1",
+    "jasmine-node": "~1.12.0",
+    "should": "~2.1.1",
+    "chai": "~1.8.1",
+    "node-phantom": "~0.2.5"
   },
   "keywords": [
     "gruntplugin",

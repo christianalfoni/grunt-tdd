@@ -1,4 +1,6 @@
-var _ = require('lodash');
+var _ = require('lodash'),
+    stack = require('./stackExtractor'),
+    cleaner = require('./suiteCleaner');
 
 var p = {
     suites: [],
@@ -51,41 +53,6 @@ var p = {
         var test = p.getUnresolvedTest(name, (result.type !== 'success'));
         test.result = result;
     },
-    cleanSuites: function () {
-        var traverse = function (array, isTests) {
-            var x,
-                object;
-            for (x = 0; x < array.length; x++) {
-                object = array[x];
-                if (isTests) {
-                    p.cleanTest(object);
-                } else {
-                    p.cleanContext(object);
-                    if (object.tests.length) {
-                        traverse(object.tests, true);
-                    }
-                    if (object.contexts.length) {
-                        traverse(object.contexts);
-                    }
-                }
-            }
-        };
-        traverse(p.suites);
-    },
-    cleanTest: function (test) {
-        for (var prop in test) {
-            if (prop !== 'result' && prop !== 'name') {
-                delete test[prop];
-            }
-        }
-    },
-    cleanContext: function (context) {
-        for (var prop in context) {
-            if (prop !== 'name' && prop !== 'tests' && prop !== 'contexts') {
-                delete context[prop];
-            }
-        }
-    },
     resetTest: function () {
         p.stats = {
             success: 0,
@@ -97,32 +64,61 @@ var p = {
         p.suites = [];
 
     },
+    writeResult: function (log, type) {
+        return function (test) {
+            if (test.error) {
+                log.errorlns(test.name + ' - ' + test.error);
+                var stacks = stack.extract(test.error.stack);
+                stacks.forEach(function (stack) {
+                    log.writeln('Line ' + stack.lineNumber + ' at ' + stack.path + stack.file)
+                });
+                log.writeln();
+            }
+            p.stats[type]++;
+        }
+    },
     reporter: {
-        create: function () {
+        create: function (grunt) {
+            if (grunt) this.log = grunt.log;
             return Object.create(this);
         },
 
-        listen: function (runner) {
-            runner.on('context:start', function (context) {
-                if (!context.parent) {
-                    p.suites.push(context);
-                }
-            });
-            runner.on('test:error', p.createResult('error'));
-            runner.on('test:success', p.createResult('success'));
-            runner.on('test:failure', p.createResult('failure'));
-
-        },
-        runSuite: function (runner, test) {
-            var testCopy = _.cloneDeep(test);
-            var promise = runner.runSuite([testCopy]);
-            promise.then(function () {
-                p.cleanSuites();
-                runner.emit('grunt-tdd:ready', {
-                    suites: p.suites,
-                    stats: p.stats
+        listen: function (runner, allTests) {
+            if (allTests) {
+                runner.on('test:error', p.writeResult(this.log, 'error'));
+                runner.on('test:success', p.writeResult(this.log, 'success'));
+                runner.on('test:failure', p.writeResult(this.log, 'failure'));
+            } else {
+                runner.on('context:start', function (context) {
+                    if (!context.parent) {
+                        p.suites.push(context);
+                    }
                 });
+                runner.on('test:error', p.createResult('error'));
+                runner.on('test:success', p.createResult('success'));
+                runner.on('test:failure', p.createResult('failure'));
+            }
+        }
+    },
+    runSuites: function (runner, tests) {
+        var testsCopy = _.cloneDeep(tests),
+            promise = runner.runSuite(testsCopy);
+        promise.then(function () {
+            cleaner.clean(p.suites);
+            runner.emit('grunt-tdd:ready', {
+                suites: p.suites,
+                stats: p.stats
             });
+        });
+    },
+    writeEndResult: function (options) {
+        console.log('writing end result!');
+        if (p.stats.error === 0 && p.stats.failure === 0) {
+            options.grunt.log.ok(':-)'.green.bold + ' (' + p.stats.success + ')');
+            options.done();
+        } else {
+            options.grunt.log.error(':-/'.red.bold + ' (' + (p.stats.error + p.stats.failure) + '/' + (p.stats.error + p.stats.failure + p.stats.success) + ')');
+            options.done(false);
         }
     }
 };
@@ -143,7 +139,7 @@ module.exports = {
         // Get test and handle any syntax error
         try {
             test = require(process.cwd() + '/' + tests[selectedTest]);
-        } catch (e) {
+        } catch (e) {
             return runner.emit('grunt-tdd:failed', {
                 error: 'Bad syntax in file ' + tests[selectedTest] + '\n' + e.stack
             });
@@ -160,6 +156,28 @@ module.exports = {
         }
 
         reporter.listen(runner);
-        reporter.runSuite(runner, test);
+        p.runSuites(runner, [test]);
+    },
+    runAll: function (tests, grunt, done) {
+        var testRunner = require('buster-test').testRunner,
+            runner = testRunner.create({random: false}),
+            reporter = p.reporter.create(grunt),
+            testsToRun;
+
+        p.resetTest();
+
+        // Get test and handle any syntax error
+        try {
+            testsToRun = p.loadTests(tests);
+        } catch (e) {
+            return console.log('Bad syntax in test file', e.stack);
+        }
+
+        reporter.listen(runner, true);
+        runner.on('suite:end', function () {
+            p.writeEndResult(grunt, done);
+        });
+        grunt.log.writeln();
+        runner.runSuite(testsToRun);
     }
 };

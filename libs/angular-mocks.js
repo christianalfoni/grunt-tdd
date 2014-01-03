@@ -2101,7 +2101,7 @@ if(window.jasmine || window.mocha) {
           injector.invoke(blockFns[i] || angular.noop, this);
           /* jshint +W040 */
         } catch (e) {
-          if(e.stack && errorForStack) e.stack +=  '\n' + errorForStack.stack;
+          //if(e.stack && errorForStack) e.stack +=  '\n' + errorForStack.stack; // Commented out due to stack being readonly in PhantomJS and do not see the need for the extra stack
           throw e;
         } finally {
           errorForStack = null;

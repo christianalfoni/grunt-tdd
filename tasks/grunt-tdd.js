@@ -67,10 +67,11 @@ module.exports = function (grunt) {
             },
             runNodeTests: function (options, selectedTest, callback) {
                   if (options.runner === 'buster') {
-                      console.log('running buster runner');
                       require(__dirname + '/../src/busterRunner').run(options.files.tests, selectedTest, callback);
                   } else if (options.runner === 'mocha') {
                       require(__dirname + '/../src/mochaRunner').run(options.files.tests, selectedTest, callback);
+                  } else if (options.runner === 'jasmine') {
+                      require(__dirname + '/../src/jasmineRunner').run(options, selectedTest, callback);
                   }
             },
             sendIndex: function (res, options) {
@@ -122,7 +123,6 @@ module.exports = function (grunt) {
                 }
             },
             addWatchTask: function (fileMap, task) {
-                console.log('adding watch task: ' + task);
                 var watchConfig = grunt.config('watch') || {},
                     files = fileMap.sources.concat(fileMap.tests);
 
@@ -151,6 +151,8 @@ module.exports = function (grunt) {
             getAssertionTools: function (options) {
                 var assertionTools = [];
                 if (options.expect) assertionTools.push(grunt.file.read(__dirname + '/../libs/expect.js'));
+                if (options.should) assertionTools.push(grunt.file.read(__dirname + '/../libs/should.js'));
+                if (options.chai) assertionTools.push(grunt.file.read(__dirname + '/../libs/chai.js'));
                 // Buster needs to be configured for the expect library
                 if (options.expect && options.runner === 'buster') assertionTools.push(grunt.file.read(__dirname + '/../src/exposeExpect.js'));
                 if (options.sinon) assertionTools.push(grunt.file.read(__dirname + '/../libs/sinon-1.7.1.js'));
@@ -166,7 +168,9 @@ module.exports = function (grunt) {
                 // Order of array is very important
                 // This is the order the browser will read the files
                 deps.css.push(grunt.file.read(__dirname + '/../staticFiles/reporterTDD.css'));
+                if (!options.node && options.requirejs) deps.js.push(grunt.file.read(__dirname + '/../libs/require.js'));
                 if (!options.node) deps.js.push(p.getRunner(options));
+                if (!options.node && options.runner === 'jasmine') deps.js.push(grunt.file.read(__dirname + '/../libs/jasmineTraceFix.js'));
                 if (!options.node) deps.js.push(p.getAssertionTools(options));
                 deps.js.push(grunt.file.read(__dirname + '/../src/reporterTDD.js'));
                 if (!options.node && p.hasAngular(options.files.libs)) deps.js.push(grunt.file.read(__dirname + '/../libs/angular-mocks.js'));
@@ -177,16 +181,37 @@ module.exports = function (grunt) {
             loadNodeGlobals: function (options) {
                 if (options.runner === 'buster') global.buster = require('buster-test');
                 if (options.expect) global.expect = require('expect.js');
+                if (options.should) global.should = require('should');
+                if (options.chai) global.chai = require('chai');
                 if (options.sinon) global.sinon = require('sinon');
+
+            },
+            runAllTests: function (options, done) {
+                require(__dirname + '/../src/nodeRunner').run({
+                    done: done,
+                    runAll: options.runAll,
+                    runner: options.runner,
+                    node: options.node,
+                    grunt: grunt,
+                    tests: options.files.tests,
+                    expect: options.expect // When running Jasmine, expect has to be overwritten, if optioned
+                });
             }
         };
 
     grunt.registerMultiTask('tdd', 'Test single test files in browser with automatic reload', function () {
-        var options,
+        var options = p.configure(p.extractFilesMap(this.files), this.options()),
             server,
-            deps;
-        if (!serverRunning) {
-            options = p.configure(p.extractFilesMap(this.files), this.options());
+            deps,
+            runAll = options.runAll || grunt.option('runAll');
+
+        options.runAll = runAll;
+
+        if (options.node && runAll) {
+            var done = this.async();
+            p.loadNodeGlobals(options);
+            p.runAllTests(options, done);
+        } else if (!serverRunning) {
             deps = p.getDeps(options);
             if (options.node) p.loadNodeGlobals(options);
             server = http.createServer(function (req, res) {
@@ -213,13 +238,14 @@ module.exports = function (grunt) {
             });
             server.listen(options.port);
             serverRunning = true;
-            console.log('Adding watch task');
-            p.addWatchTask(p.extractOriginalPaths(this.files), this.nameArgs);
-
+            if (runAll) {
+                var done = this.async();
+                p.runAllTests(options, done);
+            } else {
+                p.addWatchTask(p.extractOriginalPaths(this.files), this.nameArgs);
+            }
         } else {
-            console.log('setting doReload to true');
             doReload = true;
-
         }
     });
 };

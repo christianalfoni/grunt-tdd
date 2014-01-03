@@ -25,7 +25,7 @@
         registerEvents: function () {
             window.buster.testRunner.on('context:start', buster.addTestSuite);
             window.buster.testRunner.on('test:success', buster.createResult('success'));
-            window.buster.testRunner.on('test:failure', buster.createResult('failure'));
+            window.buster.testRunner.on('test:failure', buster.createResult('error'));
             window.buster.testRunner.on('test:error', buster.createResult('error'));
             window.buster.testRunner.on('test:deferred', buster.createResult('deferred'));
             window.buster.testRunner.on('suite:end', reporterTDD.displayResults);
@@ -93,16 +93,14 @@
      */
     var jasmine = {
         initialize: function () {
-            window.addEventListener('load', function () {
-                var jasmineFinished = window.jasmine.getEnv().currentRunner().finishCallback;
-                window.jasmine.getEnv().currentRunner().finishCallback = function () {
-                    jasmineFinished.call(this);
-                    reporterTDD.suites.push(window.jasmine.getEnv().currentRunner().suites_[0]);
-                    jasmine.cleanSuites();
-                    reporterTDD.displayResults();
-                };
-                window.jasmine.getEnv().execute();
-            });
+            var jasmineFinished = window.jasmine.getEnv().currentRunner().finishCallback;
+            window.jasmine.getEnv().currentRunner().finishCallback = function () {
+                jasmineFinished.call(this);
+                reporterTDD.suites.push(window.jasmine.getEnv().currentRunner().suites_[0]);
+                jasmine.cleanSuites();
+                reporterTDD.displayResults();
+            };
+            window.jasmine.getEnv().execute();
         },
         cleanSuites: function () {
             var traverse = function (array, isTests) {
@@ -167,17 +165,11 @@
      */
     var mocha = {
         initialize: function () {
-            window.mocha.setup({
-                ui: 'bdd',
-                ignoreLeaks: true
-            });
-            window.addEventListener('load', function () {
-                var runner = window.mocha.run();
-                runner.on('end', function () {
-                    reporterTDD.suites = window.mocha.suite.suites;
-                    mocha.cleanSuites();
-                    reporterTDD.displayResults();
-                });
+            var runner = window.mocha.run();
+            runner.on('end', function () {
+                reporterTDD.suites = window.mocha.suite.suites;
+                mocha.cleanSuites();
+                reporterTDD.displayResults();
             });
         },
         cleanSuites: function () {
@@ -227,7 +219,6 @@
             success: 0,
             error: 0,
             timeout: 0,
-            failure: 0,
             deferred: 0
         },
         collapse: localStorage.collapse ? JSON.parse(localStorage.collapse) : false,
@@ -255,9 +246,9 @@
             } else if (window.nodeFailed) {
                 reporterTDD.displayError(window.nodeFailed);
             } else {
-                reporterTDD.setRunner();
                 reporterTDD.registerCollapseEvent();
-                reporterTDD.runner.initialize();
+                if (window.require) reporterTDD.runner.initialize();
+                else window.addEventListener('load', reporterTDD.runner.initialize);
                 window.addEventListener('load', reporterTDD.resetView);
             }
         },
@@ -283,23 +274,8 @@
                 results.className = 'results';
             }
         },
-        setRunner: function () {
-            if (window.buster) {
-                return reporterTDD.runner = reporterTDD.runners.buster;
-            }
-
-            if (window.jasmine) {
-                return reporterTDD.runner = reporterTDD.runners.jasmine;
-            }
-
-            if (window.mocha) {
-                return reporterTDD.runner = reporterTDD.runners.mocha;
-            }
-
-            reporterTDD.throw('Neither Buster, Mocha or Jasmine is available in the global scope!');
-        },
         hasErrors: function () {
-            if (reporterTDD.stats.error || reporterTDD.stats.failure || reporterTDD.stats.timeout) {
+            if (reporterTDD.stats.error || reporterTDD.stats.timeout) {
                 return true;
             } else {
                 return false;
@@ -332,9 +308,26 @@
         },
         createStack: function (stack) {
             var reducedStack = [];
-            stack = stack.split((stack.indexOf('\\n') >= 0 ? '\\n' : '\n')); // \\n is used by Node to support JSON stringify
-            stack.forEach(reporterTDD.createStackLinesToArrayIterator(reducedStack));
+            if (stack) { // Should assertion library causes no stack;
+                stack = stack.split((stack.indexOf('\\n') >= 0 ? '\\n' : '\n')); // \\n is used by Node to support JSON stringify
+                stack.forEach(reporterTDD.createStackLinesToArrayIterator(reducedStack));
+            }
             return reducedStack;
+        },
+        createStackLinesToArrayIterator: function (array) {
+            return function (stackLine) {
+                if (!stackLine.match(/(?:reporter|expect|test-runner|when|lodash|runner|runnable|should|chai).js/)) { // Removes any lines from the reporter
+                    // Kick ass regexp to extract filepath, name and line number
+                    // http://www.regexper.com/#%2F(http%3A%5C%2F%5C%2F.%2B%3F%3A%5B0-9a-z%5C%2F-%5D%2B%5C%2F)(%5Cw%2B%5C.%5Cw%2B)%3A(%5Cd%2B)%2F
+                    var validStackLine = stackLine.match(/((?:http:\/\/.+?:|\/).+\/)([0-9a-zA-Z\/-]+\.\w+):(\d+)/);
+                    if (!validStackLine) return;
+                    array.push({
+                        path: validStackLine[1],
+                        file: validStackLine[2],
+                        lineNumber: validStackLine[3]
+                    });
+                }
+            }
         },
         createStackElement: function (stack) {
             var wrapper = reporterTDD.createElement('DIV', 'stack'),
@@ -370,6 +363,7 @@
             return statsWrapper;
         },
         createResults: function () {
+            var isPhantomJS = navigator.userAgent.indexOf('PhantomJS') >= 0;
             var wrapper = reporterTDD.createElement('UL', 'results' + (reporterTDD.collapse ? ' collapse' : '')),
                 traverse = function (array, parentNode) {
                     var object,
@@ -381,6 +375,21 @@
                         object = array[x];
 
                         if (object.result) {
+                            // TODO: Refactor
+                            if (isPhantomJS) {
+                                var logResult = {};
+                                logResult.name = object.name;
+                                logResult.result = {};
+                                logResult.result.type = object.result.type;
+                                if (object.result.type === 'error') {
+                                    logResult.result.message = object.result.message;
+                                    logResult.result.stack = object.result.stack;
+                                }
+                                console.log(JSON.stringify({
+                                    '__GRUNT-TDD': logResult
+                                }));
+                            }
+
                             test = reporterTDD.createResultElement(object);
                             parentNode.appendChild(test);
                         } else {
@@ -402,25 +411,28 @@
                 };
             traverse(reporterTDD.suites, wrapper);
             wrapper.id = 'results';
+            if (isPhantomJS) console.log('DONE');
             return wrapper;
-        },
-        createStackLinesToArrayIterator: function (array) {
-            return function (stackLine) {
-                if (!stackLine.match(/(?:reporter|expect|test-runner|when|lodash|runner|runnable).js/)) { // Removes any lines from the reporter
-                    // Kick ass regexp to extract filepath, name and line number
-                    // http://www.regexper.com/#%2F(http%3A%5C%2F%5C%2F.%2B%3F%3A%5B0-9a-z%5C%2F-%5D%2B%5C%2F)(%5Cw%2B%5C.%5Cw%2B)%3A(%5Cd%2B)%2F
-                    var validStackLine = stackLine.match(/((?:http:\/\/.+?:|\/).+\/)([0-9a-zA-Z\/-]+\.\w+):(\d+)/);
-                    if (!validStackLine) return;
-                    array.push({
-                        path: validStackLine[1],
-                        file: validStackLine[2],
-                        lineNumber: validStackLine[3]
-                    });
-                }
-            }
         }
     }
 
-    reporterTDD.initialize();
+    if (window.buster) {
+        reporterTDD.runner = reporterTDD.runners.buster;
+    } else if (window.jasmine) {
+        reporterTDD.runner = reporterTDD.runners.jasmine;
+    } else if (window.mocha) {
+        window.mocha.setup({
+            ui: 'bdd',
+            ignoreLeaks: true
+        });
+        reporterTDD.runner = reporterTDD.runners.mocha;
+    } else if (!window.nodeSuites && !window.nodeFailed) {
+        reporterTDD.throw('Neither Buster, Mocha or Jasmine is available in the global scope!');
+    }
 
+    if (window.require) {
+        window.tddRun = reporterTDD.initialize;
+    } else {
+        reporterTDD.initialize();
+    }
 }(window));

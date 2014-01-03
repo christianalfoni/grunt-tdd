@@ -13,7 +13,18 @@ var p = {
         });
         return sourcesScripts;
     },
-    addTests: function (tests, selectedTest) {
+    addTests: function (options, selectedTest) {
+        if (options.runAll) {
+            var scripts = '';
+            options.files.tests.forEach(function (test) {
+                scripts += '<script src="' + test + '"></script>\n';
+            });
+            return scripts;
+        } else {
+            return '<script src="' + options.files.tests[selectedTest] + '"></script>';
+        }
+    },
+    addTestSelections: function (tests, selectedTest) {
         var testsString = '';
         tests.forEach(function (test, index) {
             testsString += '<option' + (index.toString() === selectedTest ? ' selected' : '') + '>' + test + '</option>';
@@ -35,6 +46,17 @@ var p = {
             results += 'var nodeStats = JSON.parse(\'' + p.safeString(nodeResults.stats) + '\');';
         }
         return results;
+    },
+    buildRequireJsScript: function (options, selectedTest) {
+        var htmlString = '';
+        if (options.runAll) {
+            htmlString += '<script>require([';
+            htmlString += '\'' + options.files.tests.join('\',\'') + '\'';
+            htmlString +=  '], window.tddRun);</script>';
+        } else {
+            htmlString = '<script>require([\'' + options.files.tests[selectedTest] + '\'], window.tddRun);</script>';
+        }
+        return htmlString;
     }
 };
 
@@ -44,13 +66,13 @@ module.exports = {
         var template = grunt.file.read(__dirname + '/../staticFiles/template.html'),
             sources = options.node ? '' : p.addSources(options.files.sources),
             libs = options.node ? '' : p.addLibs(options.files.libs),
-            test = options.node ? '' : '<script src="' + options.files.tests[selectedTest] + '"></script>',
+            test = options.node ? '' : p.addTests(options, selectedTest),
             nodeResults = nodeResults ? p.buildNodeResults(nodeResults) : '';
 
-        template = template.replace('{{tests}}', p.addTests(options.files.tests, selectedTest));
+        template = template.replace('{{tests}}', p.addTestSelections(options.files.tests, selectedTest));
         template = template.replace('{{sources}}', sources);
         template = template.replace('{{libs}}', libs);
-        template = template.replace('{{test}}', test);
+        template = template.replace('{{test}}', options.requirejs ? p.buildRequireJsScript(options, selectedTest) : test);
         template = template.replace('{{node}}', nodeResults);
 
         return template;
