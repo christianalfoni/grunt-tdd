@@ -88,4 +88,4 @@ Grunt-tdd ideally runs on your second monitor, in a browser window. When you wri
 
 **When you start developing:**
 - Run the task
-- Open the browser at localhost and port configured (default 3000)
+- Open the browser at localhost and port configured (default 3001)
