@@ -11,6 +11,7 @@ Grunt-tdd ideally runs on your second monitor, in a browser window. When you wri
 - Supports Buster, Mocha and Jasmine
 - Supports AngularJS unit tests
 - Runs both browser and node tests and displays the result in your browser
+- Hit **SPACEBAR** to toggle collapsing of tests, only showing the ones that give error
 
 ## Configuration
 
@@ -74,11 +75,11 @@ Grunt-tdd ideally runs on your second monitor, in a browser window. When you wri
 
 ## Get going
 
-** First time: **
+**First time:**
 - Choose your testing library
 - I recommend using expect as assertion tool (expect.js)
 - Configure requirejs if needed
 
-** When you are developing: **
+**When you start developing:**
 - Run the task
 - Open the browser at localhost and port configured (default 3000)
