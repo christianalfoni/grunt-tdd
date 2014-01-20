@@ -16,6 +16,8 @@ Grunt-tdd ideally runs on your second monitor, in a browser window. When you wri
 ## Deps
 - **npm install grunt-contrib-watch**
 
+**Important!** Due to watching a lot of files for changes when writing tests it is needed to increase MacOSX default open file limit, which is very low by default. Create/Edit your ~/.bash_profile file and add the following line: ulimit -S -n 2048 (or higher).
+
 ## Configuration
 
 ``` javascript
