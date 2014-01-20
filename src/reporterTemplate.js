@@ -50,12 +50,15 @@ var p = {
     buildRequireJsScript: function (options, selectedTest) {
         var htmlString = '';
         if (options.runAll) {
-            htmlString += '<script>require([';
+            htmlString += '<script>';
+            htmlString += 'requirejs.config(' + JSON.stringify(options.requirejs) + ');\n';
+            htmlString += 'require([';
             htmlString += '\'' + options.files.tests.join('\',\'') + '\'';
             htmlString +=  '], window.tddRun);</script>';
         } else {
             htmlString = '<script>require([\'' + options.files.tests[selectedTest] + '\'], window.tddRun);</script>';
         }
+        console.log(htmlString);
         return htmlString;
     }
 };
