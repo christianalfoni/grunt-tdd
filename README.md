@@ -82,7 +82,7 @@ Grunt-tdd ideally runs on your second monitor, in a browser window. When you wri
 ## Get going
 
 **First time:**
-- Choose your testing library
+- Choose your test runner. Buster, mocha or jasmine
 - I recommend using expect as assertion tool (expect.js)
 - Configure requirejs if needed
 
