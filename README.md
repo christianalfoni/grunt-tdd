@@ -1,6 +1,8 @@
 grunt-tdd
 =========
 
+> Presentation at: [Grunt-tdd presentation on YouTube](http://www.youtube.com/watch?v=FVEkDkyso4Y&feature=youtube_gdata)
+
 It is difficult to get going with TDD. There are a lot of presentations on how to write tests, but really, it is not understanding how to write tests that prevents you from doing TDD, it is the **process**. First of all it has to be easy to set up your test environment and even more important, you need automatic feedback when writing tests. It should not take you out of the process of implementing code, but naturally be a part of it.
 
 Grunt-tdd ideally runs on your second monitor, in a browser window. When you write your tests it will automatically refresh. It will also refresh when you start implementing your code. This automatic refresh will let you easily jump between your test-file and implemention-file, keeping you inside your IDE.
