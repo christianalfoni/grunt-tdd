@@ -139,7 +139,11 @@ var p = {
                     test.result.message = test.err.message;
                     test.result.stack = test.err.stack;
                 }
-                if (isError && writeError) writeError(test);
+                if (isError && writeError) {
+                    writeError(test);
+                } else {
+                    p.stats.success++;
+                }
                 for (var prop in test) {
                     if (prop !== 'result' && prop !== 'name') {
                         delete test[prop];
@@ -185,6 +189,7 @@ var p = {
                 writeError = p.createWriteResult(options, 'error');
             }
             return function (test) {
+                console.log('adding test!');
                 var isError = test.results_.failedCount > 0,
                     errorItem;
                 test.name = test.description;
@@ -196,7 +201,11 @@ var p = {
                     test.result.stack = errorItem.trace.stack;
                 }
 
-                if (isError && writeError) writeError(test);
+                if (isError && writeError) {
+                    writeError(test);
+                } else {
+                    p.stats.success++;
+                }
                 for (var prop in test) {
                     if (prop !== 'result' && prop !== 'name') {
                         delete test[prop];

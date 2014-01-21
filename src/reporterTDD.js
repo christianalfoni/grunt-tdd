@@ -239,6 +239,7 @@
             document.body.style.display = 'block';
         },
         initialize: function () {
+            reporterTDD.registerCollapseEvent();
             if (window.nodeSuites) {
                 reporterTDD.suites = window.nodeSuites;
                 reporterTDD.stats = window.nodeStats;
@@ -246,7 +247,6 @@
             } else if (window.nodeFailed) {
                 reporterTDD.displayError(window.nodeFailed);
             } else {
-                reporterTDD.registerCollapseEvent();
                 if (window.require) reporterTDD.runner.initialize();
                 else window.addEventListener('load', reporterTDD.runner.initialize);
                 window.addEventListener('load', reporterTDD.resetView);

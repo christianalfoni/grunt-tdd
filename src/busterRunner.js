@@ -1,6 +1,6 @@
 var _ = require('lodash'),
-    stack = require('./stackExtractor'),
-    cleaner = require('./suiteCleaner');
+    stack = require('./stackExtractor');
+    clean = require('./suiteCleaner');
 
 var p = {
     suites: [],
@@ -104,7 +104,8 @@ var p = {
         var testsCopy = _.cloneDeep(tests),
             promise = runner.runSuite(testsCopy);
         promise.then(function () {
-            cleaner.clean(p.suites);
+
+            clean(p.suites);
             runner.emit('grunt-tdd:ready', {
                 suites: p.suites,
                 stats: p.stats
