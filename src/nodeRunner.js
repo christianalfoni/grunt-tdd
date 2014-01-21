@@ -189,7 +189,7 @@ var p = {
                 writeError = p.createWriteResult(options, 'error');
             }
             return function (test) {
-                console.log('adding test!');
+
                 var isError = test.results_.failedCount > 0,
                     errorItem;
                 test.name = test.description;
