@@ -1,7 +1,7 @@
 grunt-tdd
 =========
 
-> Presentation at: [Grunt-tdd presentation on YouTube](http://www.youtube.com/watch?v=FVEkDkyso4Y&feature=youtube_gdata)
+> Presentation at: [Grunt-tdd presentation on YouTube](http://www.youtube.com/watch?v=1xMKeq-plFk)
 
 It is difficult to get going with TDD. There are a lot of presentations on how to write tests, but really, it is not understanding how to write tests that prevents you from doing TDD, it is the **process**. First of all it has to be easy to set up your test environment and even more important, you need automatic feedback when writing tests. It should not take you out of the process of implementing code, but naturally be a part of it.
 
