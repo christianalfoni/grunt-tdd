@@ -15,6 +15,7 @@ Grunt-tdd ideally runs on your second monitor, in a browser window. When you wri
 - Runs both browser and node tests and displays the result in your browser
 - Hit **SPACEBAR** to toggle collapsing of tests, only showing the ones that give error
 - All your test files are found on the dropdown top right
+- Run f.ex. **grunt tdd:browser --runAll** to run all tests in terminal
 
 ## Deps
 - **npm install grunt-contrib-watch**
