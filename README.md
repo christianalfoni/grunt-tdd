@@ -24,6 +24,8 @@ Grunt-tdd ideally runs on your second monitor, in a browser window. When you wri
 
 ## Configuration
 
+In your **Gruntfile.js**:
+
 ``` javascript
 
   module.exports = function (grunt) {
@@ -80,15 +82,18 @@ Grunt-tdd ideally runs on your second monitor, in a browser window. When you wri
       }
     });
   }
+
+  grunt.loadNpmTasks('grunt-tdd');
+
 ```
 
 ## Get going
 
-**First time:**
+### First time
 - Choose your test runner. Buster, mocha or jasmine
 - I recommend using expect as assertion tool (expect.js)
 - Configure requirejs if needed
 
-**When you start developing:**
-- Run the task
+### When you start developing
+- Run the task with **grunt tdd:#PROFILE#** (#PROFILE# is the name of your task profile. With the examples above it would be: node, browser or browser2)
 - Open the browser at localhost and port configured (default 3001)

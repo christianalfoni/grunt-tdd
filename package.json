@@ -1,7 +1,7 @@
 {
     "name": "grunt-tdd",
     "description": "Run browser and Node JS tests on Buster, Mocha or Jasmine and get the reports in the browser",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "homepage": "https://github.com/christianalfoni/grunt-tdd",
     "author": {
         "name": "christianalfoni",
