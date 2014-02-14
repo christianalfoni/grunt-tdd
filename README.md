@@ -29,60 +29,60 @@ In your **Gruntfile.js**:
 
 ``` javascript
 
-		module.exports = function (grunt) {
+	module.exports = function (grunt) {
     		grunt.initConfig({
       			tdd: { 
         			// NODE CONFIG
         			node: {
-          			files: {
-            				sources: ['server/src/**/*.js'], // Where your application files are located
-            				libs: [], // Any general libs needed to be loaded, will be loaded from your node_modules folder
-            				tests: ['server/tests/**/*-test.js'] // Where your tests are located
-          			},
-          			options: {
-            				node: true, // Set to true if testing node code
-            				runner: 'jasmine', // jasmine, mocha or buster
-            				expect: true // Use the expect.js library for assertions
-          			}
+          				files: {
+            					sources: ['server/src/**/*.js'], // Where your application files are located
+            					libs: [], // Any general libs needed to be loaded, will be loaded from your node_modules folder
+            					tests: ['server/tests/**/*-test.js'] // Where your tests are located
+          				},
+          				options: {
+            					node: true, // Set to true if testing node code
+            					runner: 'jasmine', // jasmine, mocha or buster
+            					expect: true // Use the expect.js library for assertions
+          				}
         			},
         
         			// BROWSER CONFIG
         			browser: {
-          			files: {
-            				sources: ['client/src/**/*.js'], // Where your application files are located
-            				libs: [ // Libs loaded in order
-              				'client/libs/jquery.js',
-              				'client/libs/underscore.js', 
-              				'client/libs/backbone.js'],
-            				tests: ['client/tests/**/*-test.js'] // Where your tests are located
-          			},
-          			options: {
-            				runner: 'buster', // jasmine, mocha or buster
-            				expect: true, // Use the expect.js library for assertions
-            				sinon: true // For spies, stubs and fake XHR
-          			}
+          				files: {
+            					sources: ['client/src/**/*.js'], // Where your application files are located
+            					libs: [ // Libs loaded in order
+              						'client/libs/jquery.js',
+              						'client/libs/underscore.js', 
+              						'client/libs/backbone.js'],
+            					tests: ['client/tests/**/*-test.js'] // Where your tests are located
+          				},
+          				options: {
+            					runner: 'buster', // jasmine, mocha or buster
+            					expect: true, // Use the expect.js library for assertions
+            					sinon: true // For spies, stubs and fake XHR
+          				}
         			},
         
 				// REQUIREJS CONFIG
-        		browser2: {
-          		files: {
-            			sources: ['client/src/**/*.js'], // Where your application files are located
-            			libs: [ // Libs loaded in order
-              			'client/libs/jquery.js',
-              			'client/libs/underscore.js', 
-              			'client/libs/backbone.js'],
-            			tests: ['client/tests/**/*-test.js'] // Where your tests are located
-          		},
-          		options: {
-            			runner: 'mocha', // jasmine, mocha or buster
-            			expect: true // Use the expect.js library for assertions
-            			requirejs: {
-              			baseUrl: 'client/'
-            			}
-          		}
-        		}
-      		}
-    	});
+        			browser2: {
+          				files: {
+            					sources: ['client/src/**/*.js'], // Where your application files are located
+            					libs: [ // Libs loaded in order
+              						'client/libs/jquery.js',
+              						'client/libs/underscore.js', 
+              						'client/libs/backbone.js'],
+            					tests: ['client/tests/**/*-test.js'] // Where your tests are located
+          				},
+          				options: {
+            					runner: 'mocha', // jasmine, mocha or buster
+            					expect: true // Use the expect.js library for assertions
+            					requirejs: {
+              						baseUrl: 'client/'
+            					}
+          				}
+        			}
+      			}
+    		});
   	}
 
   	grunt.loadNpmTasks('grunt-tdd');
