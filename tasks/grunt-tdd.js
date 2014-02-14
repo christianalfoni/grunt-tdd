@@ -186,6 +186,16 @@ module.exports = function (grunt) {
                 if (options.sinon) global.sinon = require('sinon');
 
             },
+            loadNodeLibs: function (files) {
+                files.forEach(function (file) {
+                    if (file.dest === 'libs') {
+                        file.orig.src.forEach(function (lib) {
+                            require(__dirname + '/../../' + lib);
+                        });
+                    }
+
+                });
+            },
             runAllTests: function (options, done) {
                 require(__dirname + '/../src/nodeRunner').run({
                     done: done,
@@ -213,7 +223,11 @@ module.exports = function (grunt) {
             p.runAllTests(options, done);
         } else if (!serverRunning) {
             deps = p.getDeps(options);
-            if (options.node) p.loadNodeGlobals(options);
+
+            if (options.node) {
+                p.loadNodeLibs(this.files);
+                p.loadNodeGlobals(options);
+            }
             server = http.createServer(function (req, res) {
                 var urlData = url.parse(req.url);
                 switch (urlData.pathname) {

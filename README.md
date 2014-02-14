@@ -36,7 +36,7 @@ In your **Gruntfile.js**:
         			node: {
           			files: {
             				sources: ['server/src/**/*.js'], // Where your application files are located
-            				libs: [], // Any general libs needed to be loaded
+            				libs: [], // Any general libs needed to be loaded, will be loaded from your node_modules folder
             				tests: ['server/tests/**/*-test.js'] // Where your tests are located
           			},
           			options: {
