@@ -219,6 +219,7 @@ module.exports = function (grunt) {
 
         if (options.node && runAll) {
             var done = this.async();
+            p.loadNodeLibs(this.files);
             p.loadNodeGlobals(options);
             p.runAllTests(options, done);
         } else if (!serverRunning) {
