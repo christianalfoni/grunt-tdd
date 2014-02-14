@@ -232,6 +232,12 @@ module.exports = function (grunt) {
                     case '/test':
                         p.selectTest(res, urlData.query, options);
                         break;
+                    case '/buster-test.css':
+                        res.writeHead(200, {
+                            "Content-Type": "text/css"
+                        });
+                        res.end(''); // Do not send buster CSS file as it is not used
+                        break;
                     default:
                         p.sendFile(req, res);
                 }

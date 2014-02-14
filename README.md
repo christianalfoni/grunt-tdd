@@ -12,6 +12,7 @@ Grunt-tdd ideally runs on your second monitor, in a browser window. When you wri
 - It is a UNIT testing reporter
 - Supports Buster, Mocha and Jasmine
 - Supports AngularJS unit tests
+- Supports sinon.js (stubbing, spies and fake XHR) 
 - Runs both browser and node tests and displays the result in your browser
 - Hit **SPACEBAR** to toggle collapsing of tests, only showing the ones that give error
 - All your test files are found on the dropdown top right
@@ -26,66 +27,67 @@ Grunt-tdd ideally runs on your second monitor, in a browser window. When you wri
 
 In your **Gruntfile.js**:
 
-``` javascript
+	``` javascript
 
-  module.exports = function (grunt) {
-    grunt.initConfig({
-      tdd: { 
-        // NODE CONFIG
-        node: {
-          files: {
-            sources: ['server/src/**/*.js'], // Where your application files are located
-            libs: [], // Any general libs needed to be loaded
-            tests: ['server/tests/**/*-test.js'] // Where your tests are located
-          },
-          options: {
-            node: true, // Set to true if testing node code
-            runner: 'jasmine', // jasmine, mocha or buster
-            expect: true // Use the expect.js library for assertions
-          }
-        },
+		module.exports = function (grunt) {
+    		grunt.initConfig({
+      			tdd: { 
+        			// NODE CONFIG
+        			node: {
+          			files: {
+            				sources: ['server/src/**/*.js'], // Where your application files are located
+            				libs: [], // Any general libs needed to be loaded
+            				tests: ['server/tests/**/*-test.js'] // Where your tests are located
+          			},
+          			options: {
+            				node: true, // Set to true if testing node code
+            				runner: 'jasmine', // jasmine, mocha or buster
+            				expect: true // Use the expect.js library for assertions
+          			}
+        			},
         
-        // BROWSER CONFIG
-        browser: {
-          files: {
-            sources: ['client/src/**/*.js'], // Where your application files are located
-            libs: [ // Libs loaded in order
-              'client/libs/jquery.js',
-              'client/libs/underscore.js', 
-              'client/libs/backbone.js'],
-            tests: ['client/tests/**/*-test.js'] // Where your tests are located
-          },
-          options: {
-            runner: 'mocha', // jasmine, mocha or buster
-            expect: true // Use the expect.js library for assertions
-          }
-        },
+        			// BROWSER CONFIG
+        			browser: {
+          			files: {
+            				sources: ['client/src/**/*.js'], // Where your application files are located
+            				libs: [ // Libs loaded in order
+              				'client/libs/jquery.js',
+              				'client/libs/underscore.js', 
+              				'client/libs/backbone.js'],
+            				tests: ['client/tests/**/*-test.js'] // Where your tests are located
+          			},
+          			options: {
+            				runner: 'buster', // jasmine, mocha or buster
+            				expect: true, // Use the expect.js library for assertions
+            				sinon: true // For spies, stubs and fake XHR
+          			}
+        			},
         
-        // REQUIREJS CONFIG
-        browser2: {
-          files: {
-            sources: ['client/src/**/*.js'], // Where your application files are located
-            requirejs: {
-              baseUrl: 'client/'
-            },
-            libs: [ // Libs loaded in order
-              'client/libs/jquery.js',
-              'client/libs/underscore.js', 
-              'client/libs/backbone.js'],
-            tests: ['client/tests/**/*-test.js'] // Where your tests are located
-          },
-          options: {
-            runner: 'mocha', // jasmine, mocha or buster
-            expect: true // Use the expect.js library for assertions
-          }
-        }
-      }
-    });
-  }
+				// REQUIREJS CONFIG
+        		browser2: {
+          		files: {
+            			sources: ['client/src/**/*.js'], // Where your application files are located
+            			libs: [ // Libs loaded in order
+              			'client/libs/jquery.js',
+              			'client/libs/underscore.js', 
+              			'client/libs/backbone.js'],
+            			tests: ['client/tests/**/*-test.js'] // Where your tests are located
+          		},
+          		options: {
+            			runner: 'mocha', // jasmine, mocha or buster
+            			expect: true // Use the expect.js library for assertions
+            			requirejs: {
+              			baseUrl: 'client/'
+            			}
+          		}
+        		}
+      		}
+    	});
+  	}
 
-  grunt.loadNpmTasks('grunt-tdd');
+  	grunt.loadNpmTasks('grunt-tdd');
 
-```
+	```
 
 ## Get going
 
@@ -95,5 +97,5 @@ In your **Gruntfile.js**:
 - Configure requirejs if needed
 
 ### When you start developing
-- Run the task with **grunt tdd:#PROFILE#** (#PROFILE# is the name of your task profile. With the examples above it would be: node, browser or browser2)
+- Run the task with **grunt tdd:#PROFILE#** (#PROFILE# is the name of your task profile. With the examples above it would be: grunt tdd:node, grunt tdd:browser or grunt tdd:browser2)
 - Open the browser at localhost and port configured (default 3001)
