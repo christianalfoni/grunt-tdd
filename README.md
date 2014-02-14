@@ -27,7 +27,7 @@ Grunt-tdd ideally runs on your second monitor, in a browser window. When you wri
 
 In your **Gruntfile.js**:
 
-	``` javascript
+``` javascript
 
 		module.exports = function (grunt) {
     		grunt.initConfig({
@@ -87,7 +87,7 @@ In your **Gruntfile.js**:
 
   	grunt.loadNpmTasks('grunt-tdd');
 
-	```
+```
 
 ## Get going
 
