@@ -83,9 +83,11 @@ In your **Gruntfile.js**:
         			}
       			}
     		});
-  	}
 
-  	grunt.loadNpmTasks('grunt-tdd');
+      grunt.loadNpmTasks('grunt-tdd');
+  	
+    }
+
 
 ```
 
