@@ -360,7 +360,7 @@ module.exports = {
             p[options.runner].runSuites(runner, testsToRun, options);
         } else {
 
-            var phantom = require('node-phantom'),
+            var phantom = require('node-phantom-xhr'),
                 writeResults = {
                     error: p.createWriteResult(options, 'error'),
                     success: p.createWriteResult(options, 'success')
