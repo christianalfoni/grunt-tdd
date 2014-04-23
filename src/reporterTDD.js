@@ -263,6 +263,7 @@
                     reporterTDD.collapse = !reporterTDD.collapse;
                     reporterTDD.toggleCollapse();
                     localStorage.collapse = reporterTDD.collapse;
+                    event.preventDefault();
                 }
             });
         },
