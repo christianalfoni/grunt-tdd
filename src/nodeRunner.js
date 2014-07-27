@@ -381,7 +381,7 @@ module.exports = {
                                 console.log(e);
                         }
                     };
-                    return page.open('http://localhost:3001/', function (err, status) {
+                    return page.open('http://localhost:' + options.port + '/', function (err, status) {
 
                     });
                 });
