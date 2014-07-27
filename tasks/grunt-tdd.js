@@ -204,6 +204,7 @@ module.exports = function (grunt) {
                     node: options.node,
                     grunt: grunt,
                     tests: options.files.tests,
+                    port: options.port || 3001,
                     expect: options.expect // When running Jasmine, expect has to be overwritten, if optioned
                 });
             }
